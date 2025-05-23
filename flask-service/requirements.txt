@@ -1,0 +1,2 @@
+ipykernel>=6.29
+jupyter>=1.1
