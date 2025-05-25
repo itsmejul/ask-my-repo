@@ -1,11 +1,13 @@
 from flask import Flask
 from importlib.resources import files
 from flask_restful import Api, Resource, request
+from flask_cors import CORS
 
 from retrieve import init, clone_and_read
 
 app = Flask(__name__)
 api = Api(app)
+CORS(app, resources={r"/repo/*": {"origins": "http://localhost:8000"}}) #Change this to FE adress
 
 
 class QueryRepo(Resource):

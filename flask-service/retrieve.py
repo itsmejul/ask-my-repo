@@ -96,9 +96,13 @@ def clone_and_read(repo_url, query):
     clone_repo(repo_url=repo_url, target_dir="./temp")
 
     documents = read_directory_documents("./temp")
+    print("Creating index...")
     create_index(documents)
+    print("querying index...")
     retrieval_results = query_index(query)
+    print("querying llm...")
     llm_response = query_llm(query, retrieval_results)
     
     subprocess.run(["rm", "-rf", "./temp"])
+    print("returning...")
     return llm_response
