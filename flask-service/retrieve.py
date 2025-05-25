@@ -90,6 +90,7 @@ def query_llm(retrieval_results, query):
         ]
     )
     print(completion.choices[0].message.content)
+    return completion.choices[0].message.content
 
 def clone_and_read(repo_url, query):
     clone_repo(repo_url=repo_url, target_dir="./temp")
@@ -100,3 +101,4 @@ def clone_and_read(repo_url, query):
     llm_response = query_llm(query, retrieval_results)
     
     subprocess.run(["rm", "-rf", "./temp"])
+    return llm_response
