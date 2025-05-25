@@ -1,3 +1,4 @@
 flask-service/.venv
 flask-service/index
 flask-service/.env
+flask-service/__pycache__

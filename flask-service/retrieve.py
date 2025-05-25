@@ -1,0 +1,102 @@
+
+import os
+from dotenv import load_dotenv
+from git import Repo  # pip install gitpython
+
+def init():
+    load_dotenv()  # Loads env from .env file
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+    if not GROQ_API_KEY:
+        raise ValueError("Missing GROQ_API_KEY")
+
+    from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+    from llama_index.core import Settings
+
+    Settings.embed_model = HuggingFaceEmbedding(
+        model_name="BAAI/bge-small-en-v1.5"
+    )
+    # Set the embedding model, we do this only once when we start the backend
+
+
+import subprocess
+from pathlib import Path
+
+def clone_repo(repo_url: str, target_dir: str):
+    #subprocess.run(["git", "clone", "--depth", "1", repo_url, target_dir], check=True, stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+    #tempPath = Path(target_dir)
+    #gitPath = tempPath / ".git"
+    #subprocess.run(["rm", "-rf", gitPath], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    from git import Repo
+    Repo.clone_from(repo_url, target_dir)
+
+
+
+from llama_index.core.schema import TextNode
+from llama_index.core.vector_stores import SimpleVectorStore
+from llama_index.core.storage.storage_context import StorageContext
+from llama_index.llms.ollama import Ollama
+from llama_index.core.indices import VectorStoreIndex, load_index_from_storage
+
+def read_directory_documents(path):
+    from llama_index.core import SimpleDirectoryReader
+
+    documents = SimpleDirectoryReader("./temp", recursive=True).load_data()
+    return documents
+
+
+def create_index(documents):
+
+
+    # Create the index
+    vector_store = SimpleVectorStore() # TODO maybe use a more capable vector store like qdrant? 
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    llm = Ollama(model="gemma3:4b", request_timeout=300)#, base_url="http://172.26.44.37:11434") # 
+
+    index = VectorStoreIndex(documents)
+
+    # Store index in directory
+    index.storage_context.persist(persist_dir="./index")
+
+
+def query_index(query):
+    storage_context = StorageContext.from_defaults(persist_dir="./index")
+    index = load_index_from_storage(storage_context)
+    #query="What are the methods that make up the genetic algorithm?"
+    #query = "How did they center the div?"
+    #query = "how does the game loop work?"
+    
+    retriever_engine = index.as_retriever(similarity_top_k=10)
+    retrieval_results = retriever_engine.retrieve(query)
+    retrieved_drawing_ids = [n.node.metadata["file_path"] for n in retrieval_results]
+    print(retrieved_drawing_ids)
+    print([n.node.metadata["file_path"] for n in retrieval_results][:3])
+    top_3_results = [n.node.text for n in retrieval_results][:3]
+    return top_3_results
+
+def query_llm(retrieval_results, query):
+    context = ""
+    for result in retrieval_results:
+        context += result
+    from groq import Groq
+    client = Groq() # Loads the API key automatically from the environment variable
+    completion = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {
+                "role": "user",
+                "content": f"{context}\n {query}"
+            }
+        ]
+    )
+    print(completion.choices[0].message.content)
+
+def clone_and_read(repo_url, query):
+    clone_repo(repo_url=repo_url, target_dir="./temp")
+
+    documents = read_directory_documents("./temp")
+    create_index(documents)
+    retrieval_results = query_index(query)
+    llm_response = query_llm(query, retrieval_results)
+    
+    subprocess.run(["rm", "-rf", "./temp"])
