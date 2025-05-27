@@ -84,13 +84,20 @@ def create_index(documents, repo_url):
     index = VectorStoreIndex(documents, storage_context=storage_context)
 
     # Store index in directory
-    index.storage_context.persist(persist_dir=f"./storage/{collection_name}")
+    #index.storage_context.persist(persist_dir=f"./storage/{collection_name}")
 
 
 def query_index(query, repo_url):
     collection_name = hash_repo_url(repo_url)
-    storage_context = StorageContext.from_defaults(persist_dir=f"./storage/{collection_name}") # Load qdrant inde here
-    index = load_index_from_storage(storage_context)
+    client = QdrantClient(host="localhost", port=6333)
+    #client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+    # Create the index
+    vector_store = QdrantVectorStore(collection_name=collection_name, client=client)
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+
+    #storage_context = StorageContext.from_defaults(persist_dir=f"./storage/{collection_name}") # Load qdrant inde here
+    #index = load_index_from_storage(storage_context)
+    index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
     #query="What are the methods that make up the genetic algorithm?"
     #query = "How did they center the div?"
     #query = "how does the game loop work?"
