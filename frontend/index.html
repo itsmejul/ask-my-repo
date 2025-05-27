@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <input id="repo_url" type="text" placeholder="Repo url">
+    <input id="query" type="text" placeholder="Query">
+    <button onclick="sendRequest()">Send</button>
+    <div id="response" style="white-space: pre-wrap; font-family: monospace;"></div>
+
+    <script>
+      async function sendRequest() {
+        const repo_url = document.getElementById('repo_url').value;
+        const query = document.getElementById('query').value;
+
+        const res = await fetch('http://127.0.0.1:5000/repo/query', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ repo_url, query })
+        });
+
+        const data = await res.json();
+        document.getElementById('response').innerHTML = renderMarkdownLike(data.answer);
+        }
+
+        // Basic markdown-style rendering
+        function renderMarkdownLike(text) {
+        // escape HTML
+        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // code blocks
+        text = text.replace(/```([^`]+)```/gs, (_, code) =>
+            `<pre><code>${code.trim()}</code></pre>`);
+
+        // bold
+        text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+        // newlines
+        return text.replace(/\n/g, '<br>');
+        }
+
+    </script>
+  </body>
+</html>

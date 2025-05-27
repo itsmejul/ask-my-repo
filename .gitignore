@@ -2,3 +2,8 @@ flask-service/.venv
 flask-service/index
 flask-service/.env
 flask-service/__pycache__
+flask-service/storage
+
+
+# Qdrant volume where vector collections are stored
+qdrant_data

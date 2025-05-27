@@ -5,6 +5,9 @@ from flask_cors import CORS
 
 from retrieve import init, clone_and_read
 
+from dotenv import load_dotenv
+load_dotenv()  # load .env into environment variables
+
 app = Flask(__name__)
 api = Api(app)
 CORS(app, resources={r"/repo/*": {"origins": "http://localhost:8000"}}) #Change this to FE adress
@@ -13,6 +16,7 @@ CORS(app, resources={r"/repo/*": {"origins": "http://localhost:8000"}}) #Change 
 class QueryRepo(Resource):
     def post(self):
         try:
+            print("AAA")
             data = request.get_json()
             repo_url = data["repo_url"] 
             query = data["query"]
@@ -20,6 +24,7 @@ class QueryRepo(Resource):
 
             return {"answer": f"{res}"}, 200
         except Exception as e:
+            print(e)
             return "internal error: " + str(e)
 
 

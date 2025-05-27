@@ -1,13 +1,19 @@
 
+
 import os
-from dotenv import load_dotenv
+QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
+QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
 from git import Repo  # pip install gitpython
 
 def init():
-    load_dotenv()  # Loads env from .env file
-    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
     if not GROQ_API_KEY:
         raise ValueError("Missing GROQ_API_KEY")
+    if not QDRANT_HOST:
+        raise ValueError("Missing QDRANT_HOST")
+    if not QDRANT_PORT:
+        raise ValueError("Missing QDRANT_PORT")
 
     from llama_index.embeddings.huggingface import HuggingFaceEmbedding
     from llama_index.core import Settings
@@ -37,6 +43,9 @@ from llama_index.core.vector_stores import SimpleVectorStore
 from llama_index.core.storage.storage_context import StorageContext
 from llama_index.llms.ollama import Ollama
 from llama_index.core.indices import VectorStoreIndex, load_index_from_storage
+from llama_index.vector_stores.qdrant import QdrantVectorStore
+from qdrant_client import QdrantClient
+from datetime import datetime
 
 def read_directory_documents(path):
     from llama_index.core import SimpleDirectoryReader
@@ -44,23 +53,43 @@ def read_directory_documents(path):
     documents = SimpleDirectoryReader("./temp", recursive=True).load_data()
     return documents
 
+from urllib.parse import urlparse
 
-def create_index(documents):
+def sanitize_repo_url(url: str) -> str:
+    """
+    Extracts 'owner/repo' from a GitHub URL like:
+    https://github.com/owner/repo/blob/branch/path/to/file
+    """
+    parsed = urlparse(url)
+    parts = parsed.path.strip('/').split('/')
+    if len(parts) < 2:
+        raise ValueError("URL must include at least 'owner/repo'")
+    owner, repo = parts[0], parts[1]
+    return f"{owner}/{repo}"
+import hashlib
+def hash_repo_url(url: str) -> str:
+    sanitized_url = sanitize_repo_url(url)
+    return hashlib.sha1(sanitized_url.encode()).hexdigest()[:32]
 
 
+def create_index(documents, repo_url):
+
+    collection_name = hash_repo_url(repo_url)
+    client = QdrantClient(host="localhost", port=6333)
+    #client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
     # Create the index
-    vector_store = SimpleVectorStore() # TODO maybe use a more capable vector store like qdrant? 
+    vector_store = QdrantVectorStore(collection_name=collection_name, client=client)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
-    llm = Ollama(model="gemma3:4b", request_timeout=300)#, base_url="http://172.26.44.37:11434") # 
 
-    index = VectorStoreIndex(documents)
+    index = VectorStoreIndex(documents, storage_context=storage_context)
 
     # Store index in directory
-    index.storage_context.persist(persist_dir="./index")
+    index.storage_context.persist(persist_dir=f"./storage/{collection_name}")
 
 
-def query_index(query):
-    storage_context = StorageContext.from_defaults(persist_dir="./index")
+def query_index(query, repo_url):
+    collection_name = hash_repo_url(repo_url)
+    storage_context = StorageContext.from_defaults(persist_dir=f"./storage/{collection_name}") # Load qdrant inde here
     index = load_index_from_storage(storage_context)
     #query="What are the methods that make up the genetic algorithm?"
     #query = "How did they center the div?"
@@ -97,9 +126,9 @@ def clone_and_read(repo_url, query):
 
     documents = read_directory_documents("./temp")
     print("Creating index...")
-    create_index(documents)
+    create_index(documents, repo_url)
     print("querying index...")
-    retrieval_results = query_index(query)
+    retrieval_results = query_index(query, repo_url)
     print("querying llm...")
     llm_response = query_llm(query, retrieval_results)
     
