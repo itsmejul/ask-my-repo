@@ -1,22 +1,77 @@
 services:
+
+
+# microservices depends on qdrant and postgres, gateway depends on microservices, fe depends on backend
   qdrant:
     image: qdrant/qdrant:latest
-    restart: always
-    container_name: qdrant
-    ports:
+    restart: unless-stopped # Always restart when the cotainer stops for any reason, except for manual stop with $docker stop
+    container_name: qdrant  # Otherwise, container name is auto generated from project_service_index
+    ports:             # these ports will be exposed to the host
       - 6333:6333
       - 6334:6334
-    expose:
+    expose:     # expose is just for human documentation which ports are used. even if we dont use expose, still each container in the same network can use those ports
       - 6333
       - 6334
       - 6335
-    configs:
-      - source: qdrant_config
-        target: /qdrant/config/production.yaml
+    #configs: # only for docker swarm
+     # - source: qdrant_config
+      #  target: /qdrant/config/production.yaml
     volumes:
-      - ./qdrant_data:/qdrant/storage
+      - ./qdrant_data:/qdrant/storage   # bind mount, path is relative to docker-compose.yml path
+    networks:
+      - ask-my-repo-net
+  gateway:
+    build: ./gateway
+    ports: 
+      - 5000:5000
+    container_name: gateway
+    networks:
+      - ask-my-repo-net
+  
+  retrieve:
+    build: ./retrieve
+    # no ports, since it is only accessed by the gateway microservice which is in the same network
+    container_name: retrieve
+    networks:
+      - ask-my-repo-net
+  #flask:
+    #build: ./flask-service
+    #working_dir: /app
+    #command: python backend.py
+    #volumes:
+    #  - ./flask-service:/app
+    #ports:
+    #  - "5000:5000"
+    #environment:
+    #  - PYTHONPATH=/app
 
-configs:
-  qdrant_config:
-    content: |
-      log_level: INFO
+  #redis:
+  #  image: redis:latest
+  #  container_name: redis
+  #  ports:
+  #    - "6379:6379"
+  #  volumes:
+  #    - redis_data:/data
+  #  restart: unless-stopped
+
+
+  #celery:
+   # build: ./flask-service
+   # working_dir: /app
+   # command: celery -A celery_worker worker --loglevel=info
+   # volumes:
+   #   - ./flask-service:/app
+   # depends_on:
+   #   - redis
+   # environment:
+   #   - PYTHONPATH=/app
+
+#volumes:
+ # redis_data:
+
+networks:
+  ask-my-repo-net:
+#configs:
+#  qdrant_config:
+#    content: |
+#      log_level: INFO
