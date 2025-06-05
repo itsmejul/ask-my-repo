@@ -16,5 +16,6 @@ COPY . .
 ENV FLASK_APP=main.py
 ENV FLASK_RUN_HOST=0.0.0.0
 EXPOSE 5000
+ENV PYTHONUNBUFFERED=1
 
 CMD ["./venv/bin/flask", "--app", "main", "run", "--host=0.0.0.0"]

@@ -5,7 +5,7 @@ QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-from git import Repo  # pip install gitpython
+from utils import clone_repo, hash_repo_url, sanitize_repo_url, temp_repo_path
 
 def init():
     if not GROQ_API_KEY:
@@ -27,14 +27,7 @@ def init():
 import subprocess
 from pathlib import Path
 
-def clone_repo(repo_url: str, target_dir: str):
-    #subprocess.run(["git", "clone", "--depth", "1", repo_url, target_dir], check=True, stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-    #tempPath = Path(target_dir)
-    #gitPath = tempPath / ".git"
-    #subprocess.run(["rm", "-rf", gitPath], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    from git import Repo
-    Repo.clone_from(repo_url, target_dir)
 
 
 
@@ -53,36 +46,24 @@ def read_directory_documents(path):
     documents = SimpleDirectoryReader("./temp", recursive=True).load_data()
     return documents
 
-from urllib.parse import urlparse
 
-def sanitize_repo_url(url: str) -> str:
-    """
-    Extracts 'owner/repo' from a GitHub URL like:
-    https://github.com/owner/repo/blob/branch/path/to/file
-    """
-    parsed = urlparse(url)
-    parts = parsed.path.strip('/').split('/')
-    if len(parts) < 2:
-        raise ValueError("URL must include at least 'owner/repo'")
-    owner, repo = parts[0], parts[1]
-    return f"{owner}/{repo}"
-import hashlib
-def hash_repo_url(url: str) -> str:
-    sanitized_url = sanitize_repo_url(url)
-    return hashlib.sha1(sanitized_url.encode()).hexdigest()[:32]
 
 
 def create_index(documents, repo_url):
 
     collection_name = hash_repo_url(repo_url)
+    print("a")
     client = QdrantClient(host="localhost", port=6333)
+    print("e")
+    print(client.get_collections())
     #client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
     # Create the index
     vector_store = QdrantVectorStore(collection_name=collection_name, client=client)
+    print("ee")
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
-
+    print("ff")
     index = VectorStoreIndex(documents, storage_context=storage_context)
-
+    print("gg")
     # Store index in directory
     #index.storage_context.persist(persist_dir=f"./storage/{collection_name}")
 

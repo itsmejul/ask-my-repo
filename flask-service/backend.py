@@ -2,6 +2,8 @@ from flask import Flask
 from importlib.resources import files
 from flask_restful import Api, Resource, request
 from flask_cors import CORS
+import sys
+sys.path.append('.')
 
 from retrieve import init, clone_and_read
 

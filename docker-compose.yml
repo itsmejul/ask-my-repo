@@ -6,7 +6,7 @@ services:
     image: qdrant/qdrant:latest
     restart: unless-stopped # Always restart when the cotainer stops for any reason, except for manual stop with $docker stop
     container_name: qdrant  # Otherwise, container name is auto generated from project_service_index
-    ports:             # these ports will be exposed to the host
+    ports:             # these ports will be exposed to the host. we dont need it for other containers on the same network
       - 6333:6333
       - 6334:6334
     expose:     # expose is just for human documentation which ports are used. even if we dont use expose, still each container in the same network can use those ports
@@ -32,6 +32,29 @@ services:
     build: ./retrieve
     # no ports, since it is only accessed by the gateway microservice which is in the same network
     container_name: retrieve
+    networks:
+      - ask-my-repo-net
+  index:
+    build: ./index
+    container_name: index
+    networks:
+      - ask-my-repo-net
+    depends_on: 
+      - redis
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ask-my-repo-net
+
+  celery:
+    build: ./index
+    container_name: celery
+    command: celery -A celery_worker worker --loglevel=info
+    depends_on:
+      - redis
     networks:
       - ask-my-repo-net
   #flask:

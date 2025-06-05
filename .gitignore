@@ -5,6 +5,9 @@ flask-service/__pycache__
 flask-service/storage
 flask-service/temp
 
+retrieve/.env
+
+gateway/.env
 
 # Qdrant volume where vector collections are stored
 qdrant_data

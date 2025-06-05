@@ -16,6 +16,7 @@ COPY . .
 ENV FLASK_APP=main.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=5010
+ENV PYTHONUNBUFFERED=1
 
 
 CMD ["./venv/bin/flask", "--app", "main", "run", "--host=0.0.0.0"]
