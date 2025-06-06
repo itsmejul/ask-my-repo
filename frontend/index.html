@@ -1,42 +1,90 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <style>
+      #spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #333;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        display: none;
+        margin-top: 10px;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
   <body>
     <input id="repo_url" type="text" placeholder="Repo url">
     <input id="query" type="text" placeholder="Query">
-    <button onclick="sendRequest()">Send</button>
+    <button onclick="handleQuery()">Send</button>
+
+    <div id="spinner"></div>
     <div id="response" style="white-space: pre-wrap; font-family: monospace;"></div>
 
     <script>
-      async function sendRequest() {
+      async function handleQuery() {
         const repo_url = document.getElementById('repo_url').value;
         const query = document.getElementById('query').value;
 
-        const res = await fetch('http://127.0.0.1:5000/repo/query', {
+        // Trigger indexing
+        await fetch('http://localhost:5000/start-indexing', { // Here we have to use localhost instead of gateway, because the frontend will be run in the browser (or my domain) and not in the container!
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: repo_url })
+        });
+
+        // Show spinner
+        document.getElementById('spinner').style.display = 'inline-block';
+        document.getElementById('response').innerHTML = "";
+
+        // Poll status
+        const pollInterval = 3000;
+        const checkStatus = async () => {
+          const res = await fetch('http://localhost:5000/status', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ repo_url, query })
+            body: JSON.stringify({ url: repo_url })
+          });
+
+          const data = await res.json();
+          if (data.status === 'done') {
+            document.getElementById('spinner').style.display = 'none';
+            queryRepo(repo_url, query);
+          } else if (data.status === 'failed') {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('response').innerHTML = "Indexing failed.";
+          } else {
+            setTimeout(checkStatus, pollInterval);
+          }
+        };
+
+        checkStatus();
+      }
+
+      async function queryRepo(repo_url, query) {
+        const res = await fetch('http://localhost:5000/repo/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: repo_url, query })
         });
 
         const data = await res.json();
-        document.getElementById('response').innerHTML = renderMarkdownLike(data.answer);
-        }
+        document.getElementById('response').innerHTML = renderMarkdownLike(data.response);
+      }
 
-        // Basic markdown-style rendering
-        function renderMarkdownLike(text) {
-        // escape HTML
+      function renderMarkdownLike(text) {
         text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-        // code blocks
         text = text.replace(/```([^`]+)```/gs, (_, code) =>
-            `<pre><code>${code.trim()}</code></pre>`);
-
-        // bold
+          `<pre><code>${code.trim()}</code></pre>`);
         text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-
-        // newlines
         return text.replace(/\n/g, '<br>');
-        }
-
+      }
     </script>
   </body>
 </html>

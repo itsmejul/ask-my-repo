@@ -57,6 +57,13 @@ services:
       - redis
     networks:
       - ask-my-repo-net
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "8010:8010"
+    networks:
+      - ask-my-repo-net
   #flask:
     #build: ./flask-service
     #working_dir: /app
