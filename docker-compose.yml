@@ -29,7 +29,7 @@ services:
       - common.env
     networks:
       - ask-my-repo-net
-  
+      - web # so nginx can connect to gateway 
   retrieve:
     build: ./retrieve
     # no ports, since it is only accessed by the gateway microservice which is in the same network
@@ -77,8 +77,8 @@ services:
   frontend:
     build: ./frontend
     container_name: frontend
-    ports:
-      - "8010:8010" #TODO might have to remove these since now we access over nginx
+      # ports:
+      #      - "8010:8010" #TODO might have to remove these since now we access over nginx
     env_file:
       - common.env
     networks:
@@ -90,8 +90,10 @@ services:
     container_name: nginx_proxy
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro # mounts https certs
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - frontend
     networks:

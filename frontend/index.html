@@ -83,7 +83,7 @@
         const query = document.getElementById('query').value;
 
         // Trigger indexing
-        await fetch('http://localhost:5000/start-indexing', { // Here we have to use localhost instead of gateway, because the frontend will be run in the browser (or my domain) and not in the container!
+        await fetch('/api/start-indexing', { // Here we have to use localhost instead of gateway, because the frontend will be run in the browser (or my domain) and not in the container!
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url: repo_url })
@@ -96,7 +96,7 @@
         // Poll status
         const pollInterval = 3000;
         const checkStatus = async () => {
-          const res = await fetch('http://localhost:5000/status', {
+          const res = await fetch('/api/status', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url: repo_url })
@@ -118,7 +118,7 @@
       }
 
       async function queryRepo(repo_url, query) {
-        const res = await fetch('http://localhost:5000/repo/query', {
+        const res = await fetch('/api/repo/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url: repo_url, query })
