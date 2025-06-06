@@ -1,16 +1,17 @@
-from app.utils import clone_repo, temp_repo_path, read_directory_documents, create_index
-# warum app.utils statt utils?
+import os
 import redis
 import subprocess
+
 from celery_worker import celery_worker
-import os
+from app.utils import clone_repo, temp_repo_path, read_directory_documents, create_index
 
 # TODO check if the same repo is already being indexed before starting the task
 # TODO delete /temp/key if something goes wrong
 @celery_worker.task(bind=True, max_retries = 3, name="index_repo")
 def index_repo(self, url, url_id):
-
-
+    '''
+    Celery task for indexing a github repo via its url and save it in a qdrant collection corresponding to the url_id
+    '''
     redis_host = os.getenv("REDIS_HOST")
     redis_port = os.getenv("REDIS_PORT")
     r = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)

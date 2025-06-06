@@ -1,6 +1,8 @@
-# app/config.py
 import os
 
 class Config:
-    DEBUG = os.getenv("DEBUG", False)
-    REDIS_URL = os.getenv("REDIS_URL")
+    QDRANT_HOST = os.getenv("QDRANT_HOST")
+    QDRANT_PORT = int(os.getenv("QDRANT_PORT"))
+
+    FRONTEND_HOST = os.getenv("FRONTEND_HOST")
+    FRONTEND_PORT = int(os.getenv("FRONTEND_PORT"))

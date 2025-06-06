@@ -25,6 +25,8 @@ services:
     ports: 
       - 5000:5000
     container_name: gateway
+    env_file:
+      - common.env
     networks:
       - ask-my-repo-net
   

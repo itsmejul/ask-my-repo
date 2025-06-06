@@ -7,12 +7,7 @@ QDRANT_URL = "http://qdrant:6333" #TODO make it like this using network in compo
 RETRIEVE_URL = "http://retrieve:5010"
 INDEX_URL = "http://index:5020"
 api_bp = Blueprint("api", __name__)
-
-@api_bp.route("/health")
-def health():
-    return {"status": "hello"}, 200
-
-
+"""
 @api_bp.route("/repo/id", methods=["POST"])
 def id_repo():
     data = request.get_json()
@@ -29,7 +24,7 @@ def check_repo():
     url_id = hash_repo_url(url)
     exists = exists_repo(url_id)
     return {"exists" : exists}, 200
-
+"""
 @api_bp.route("/repo/query", methods=["POST"])
 def query_repo():
     data = request.get_json()
