@@ -8,16 +8,11 @@ def create_app(config_class="app.config.Config"):
     app.register_blueprint(api.api_bp)
 
     from huggingface_hub import login
-    login(token=os.environ["HUGGINGFACE_HUB_TOKEN"])
+    login(token=os.environ["HUGGINGFACE_HUB_TOKEN"]) #TODO maybe try catch here, because it will work even when login fails
     
     from llama_index.embeddings.huggingface import HuggingFaceEmbedding
     from llama_index.core import Settings
-    #from transformers import AutoModel
-
-    # Trigger cache download if not already downloaded
     embed_model_name = app.config["EMBED_MODEL_NAME"]
-    # Download model to cache
-    #AutoModel.from_pretrained(embed_model_name)
     Settings.embed_model = HuggingFaceEmbedding(
         model_name=embed_model_name
     )

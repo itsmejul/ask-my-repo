@@ -1,44 +1,9 @@
 from flask import Blueprint, request, jsonify, current_app
 import requests
-
+from celery_worker import celery_worker
 from app.tasks import index_repo
 
 api_bp = Blueprint("api", __name__)
-
-@api_bp.route("/index/start", methods=["POST"])
-def start_indexing():
-    data = request.get_json()
-    url = data.get("url")
-    url_id = data.get("id")
-    import redis
-    redis_host = current_app.config["REDIS_HOST"]
-    redis_port = current_app.config["REDIS_PORT"]
-    r = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
-    status = r.get(f"repo_status: {url_id}")
-    if status == "indexing":
-        return {"status": "indexing", "task_id": r.get(f"task_id:{repo_hash}")}
-    # if its not indexing, it either didnt start yet, or it failed, so we start it
-    r.set(f"repo_status:{url_id}", "indexing", ex=600)
-    r.expire(repo_key, 600)  # Optional: timeout in case indexing crashes
-    task = index_repo.delay(url, url_id)
-    r.set(f"task_id:{url_id}", task.id)
-    return jsonify({"task_id": task.id, "status": "started"}), 202
-
-@api_bp.route("/index/check", methods=["POST"])
-def check_indexing():
-    data = request.get_json()
-    task_id = data.get("task_id")
-
-from celery.result import AsyncResult
-from celery_worker import celery_worker
-
-@api_bp.route("/status/<task_id>")
-def get_status(task_id):
-    task = AsyncResult(task_id, app=celery_worker)
-    return jsonify({
-        "status": task.status,
-        "result": task.result if task.successful() else None
-    })
 
 @api_bp.route("/index", methods=["POST"])
 def index_start():
@@ -46,22 +11,16 @@ def index_start():
     url = data.get("url")
     url_id = data.get("id")
     
-    #TODO error case for unavalable repos
-    # start redis
+    #TODO error case for unavalable repos or wrong repo url
     import redis
-    print("importing redis")
     redis_host = current_app.config["REDIS_HOST"]
     redis_port = current_app.config["REDIS_PORT"]
     r = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
-    #r = redis.from_url("redis://redis:6379")
-    print("Redis connection:", r)
     status = r.get(f"repo_status:{url_id}") #there can be no spaces in the string!
     if status is None or status == "failed":
-        # start celery
-        task = index_repo.delay(url, url_id)
+        task = index_repo.delay(url, url_id) # start celery worker on task
     r.set(f"repo_status:{url_id}", "indexing", ex=600)
     r.expire(url_id, 600)  # Optional: timeout in case indexing crashes
-
     return {"status" : "indexing"}, 202 # 202 means task in progress
 
 @api_bp.route("/status", methods=["POST"])
