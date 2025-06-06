@@ -37,13 +37,24 @@ services:
       - retrieve/.env
     networks:
       - ask-my-repo-net
+    volumes:
+      - ./hf_cache:/root/.cache/huggingface
+    environment:
+      - TRANSFORMERS_CACHE=/root/.cache/huggingface
   index:
     build: ./index
     container_name: index
+    env_file:
+      - common.env
+      #- index/.env
     networks:
       - ask-my-repo-net
     depends_on: 
       - redis
+    volumes:
+      - ./hf_cache:/root/.cache/huggingface
+    environment:
+      - TRANSFORMERS_CACHE=/root/.cache/huggingface
   redis:
     image: redis:7
     container_name: redis
@@ -56,8 +67,11 @@ services:
     build: ./index
     container_name: celery
     command: celery -A celery_worker worker --loglevel=info
+    env_file:
+      - common.env
     depends_on:
       - redis
+    #  - index
     networks:
       - ask-my-repo-net
   frontend:

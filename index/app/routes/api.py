@@ -1,9 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 import requests
 
 from app.tasks import index_repo
 
-QDRANT_URL = "http://qdrant:6333" #TODO make it like this using network in compose "http://qdrant:6333"
 api_bp = Blueprint("api", __name__)
 
 @api_bp.route("/index/start", methods=["POST"])
@@ -12,7 +11,9 @@ def start_indexing():
     url = data.get("url")
     url_id = data.get("id")
     import redis
-    r = redis.Redis(host="redis", port=6379, decode_responses=True)
+    redis_host = current_app.config["REDIS_HOST"]
+    redis_port = current_app.config["REDIS_PORT"]
+    r = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
     status = r.get(f"repo_status: {url_id}")
     if status == "indexing":
         return {"status": "indexing", "task_id": r.get(f"task_id:{repo_hash}")}
@@ -49,8 +50,10 @@ def index_start():
     # start redis
     import redis
     print("importing redis")
-    #r = redis.Redis(host="redis", port=6379, decode_responses=True)
-    r = redis.from_url("redis://redis:6379")
+    redis_host = current_app.config["REDIS_HOST"]
+    redis_port = current_app.config["REDIS_PORT"]
+    r = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+    #r = redis.from_url("redis://redis:6379")
     print("Redis connection:", r)
     status = r.get(f"repo_status:{url_id}") #there can be no spaces in the string!
     if status is None or status == "failed":
@@ -67,7 +70,9 @@ def status():
     url_id = data.get("id")
 
     import redis
-    r = redis.Redis(host="redis", port=6379, decode_responses=True)
+    redis_host = current_app.config["REDIS_HOST"]
+    redis_port = current_app.config["REDIS_PORT"]
+    r = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
 
     status = r.get(f"repo_status:{url_id}")
     if not status:

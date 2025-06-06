@@ -11,5 +11,5 @@ class Config:
     LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME")
     N_RETRIEVAL_RESULTS = int(os.getenv("N_RETRIEVAL_RESULTS"))
     EMBED_MODEL_NAME = os.getenv("EMBED_MODEL_NAME")
-    DEBUG = os.getenv("DEBUG", False)
-    REDIS_URL = os.getenv("REDIS_URL")
+
+    

@@ -3,13 +3,17 @@ from app.utils import clone_repo, temp_repo_path, read_directory_documents, crea
 import redis
 import subprocess
 from celery_worker import celery_worker
+import os
 
 # TODO check if the same repo is already being indexed before starting the task
 # TODO delete /temp/key if something goes wrong
-# TODO poll this to see when it is done
 @celery_worker.task(bind=True, max_retries = 3, name="index_repo")
 def index_repo(self, url, url_id):
-    r = redis.Redis(host="redis", port=6379, decode_responses=True)
+
+
+    redis_host = os.getenv("REDIS_HOST")
+    redis_port = os.getenv("REDIS_PORT")
+    r = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
     try:
         temp_path = temp_repo_path(url_id) # Path to clone the repo
         clone_repo(repo_url=url, target_dir=temp_path)
@@ -17,7 +21,7 @@ def index_repo(self, url, url_id):
         documents = read_directory_documents(temp_path)
         print("Creating index...")
         create_index(documents, url_id)
-        subprocess.run(["rm", "-rf", "./temp"])
+        subprocess.run(["rm", "-rf", temp_path]) #TODO check this works with temp path instead of "./temp" ?
 
         r.set(f"repo_status:{url_id}", "done")
     except Exception as e:

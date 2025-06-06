@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 import hashlib
 from git import Repo 
 from pathlib import Path
+import os
 
 def clone_repo(repo_url: str, target_dir: str):
     Repo.clone_from(repo_url, target_dir)
@@ -26,17 +27,15 @@ def read_directory_documents(path):
     documents = SimpleDirectoryReader(path, recursive=True).load_data()
     return documents
 
-def create_index(documents, url_id):
+def create_index(documents, url_id):    
 
-    from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-    from llama_index.core import Settings
-
-    Settings.embed_model = HuggingFaceEmbedding(
-        model_name="BAAI/bge-small-en-v1.5"
-    )
     collection_name = url_id
     print("a")
-    client = QdrantClient(host="qdrant", port=6333) #TODO load from config
+    qdrant_host = os.getenv("QDRANT_HOST") #current_app.config["QDRANT_HOST"]
+    qdrant_port = os.getenv("QDRANT_PORT") # current_app.config["QDRANT_PORT"]
+    #qdrant_host = "qdrant"
+    #qdrant_port = "6333"
+    client = QdrantClient(host=qdrant_host, port=qdrant_port) #TODO load from config
     print("e")
     print(client.get_collections())
     #client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)

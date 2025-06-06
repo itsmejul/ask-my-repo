@@ -59,8 +59,10 @@ def retrieve_repo():
         context += result
     from groq import Groq
 
-    llm_model_name = current_app.config["LLM_MODEL_NAME"] # TODO explain this config 
+    llm_model_name = current_app.config["LLM_MODEL_NAME"] # TODO explain this config
+    print(llm_model_name) 
     client = Groq()
+    print("eeeee")
     completion = client.chat.completions.create(
         model=llm_model_name,
         messages=[
