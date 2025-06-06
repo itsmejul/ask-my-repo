@@ -62,6 +62,10 @@ def status():
     url = data.get("url") # TODO make this into utils method extract_id_from_request
     url_id = hash_repo_url(url)
 
-    res = requests.post(INDEX_URL + "/status", json={"id" : url_id})
-    status = res.json().get("status")
+    exists = exists_repo(url_id)
+    if not exists:
+        res = requests.post(INDEX_URL + "/status", json={"id" : url_id})
+        status = res.json().get("status")
+    else:
+        status = "done"
     return {"status" : status}, 200

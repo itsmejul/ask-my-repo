@@ -71,7 +71,7 @@ def status():
 
     status = r.get(f"repo_status:{url_id}")
     if not status:
-        n_status = "failed"
+        n_status = "not"
     elif status == "indexing":
         n_status = "indexing"
     elif status == "done":

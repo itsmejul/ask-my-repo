@@ -29,15 +29,6 @@ def retrieve_repo():
     url_id = data.get("id")
     query = data.get("query")
 
-    print("setting embed model")
-
-
-    from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-    from llama_index.core import Settings
-    #TODO move this outside
-    Settings.embed_model = HuggingFaceEmbedding(
-        model_name="BAAI/bge-small-en-v1.5"
-    )
     # Set the embedding model, we do this only once when we start the backend
     print("creating index")
     # Create index
