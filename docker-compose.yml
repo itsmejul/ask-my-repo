@@ -79,6 +79,8 @@ services:
     container_name: frontend
     ports:
       - "8010:8010"
+    env_file:
+      - common.env
     networks:
       - ask-my-repo-net
   #flask:
