@@ -12,11 +12,12 @@ def create_app(config_class="app.config.Config"):
     
     from llama_index.embeddings.huggingface import HuggingFaceEmbedding
     from llama_index.core import Settings
-    from transformers import AutoModel
+    #from transformers import AutoModel
 
     # Trigger cache download if not already downloaded
-    AutoModel.from_pretrained("BAAI/bge-small-en-v1.5")
     embed_model_name = app.config["EMBED_MODEL_NAME"]
+    # Download model to cache
+    #AutoModel.from_pretrained(embed_model_name)
     Settings.embed_model = HuggingFaceEmbedding(
         model_name=embed_model_name
     )

@@ -38,9 +38,9 @@ services:
     networks:
       - ask-my-repo-net
     volumes:
-      - ./hf_cache:/root/.cache/huggingface
-    environment:
-      - TRANSFORMERS_CACHE=/root/.cache/huggingface
+      - ./hf_cache:/tmp/llama_index
+    #environment:
+    #  - TRANSFORMERS_CACHE=/root/.cache/huggingface
   index:
     build: ./index
     container_name: index
@@ -52,9 +52,10 @@ services:
     depends_on: 
       - redis
     volumes:
-      - ./hf_cache:/root/.cache/huggingface
-    environment:
-      - TRANSFORMERS_CACHE=/root/.cache/huggingface
+      #- ./hf_cache:/root/.cache/huggingface
+      - ./hf_cache:/tmp/llama_index
+    #environment:
+    #  - TRANSFORMERS_CACHE=/root/.cache/huggingface
   redis:
     image: redis:7
     container_name: redis
@@ -74,6 +75,9 @@ services:
     #  - index
     networks:
       - ask-my-repo-net
+    volumes:
+      - ./hf_cache:/tmp/llama_index
+
   frontend:
     build: ./frontend
     container_name: frontend

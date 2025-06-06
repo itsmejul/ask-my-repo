@@ -1,10 +1,10 @@
 
 from celery import Celery
-#import os
-#redis_host = os.getenv("REDIS_HOST")
-#redis_port = os.getenv("REDIS_PORT")
-#REDIS_URL = "redis://" + redis_host + ":" + redis_port + "/0"
-REDIS_URL = "redis://redis:6379/0"
+import os
+redis_host = os.getenv("REDIS_HOST")
+redis_port = os.getenv("REDIS_PORT")
+REDIS_URL = "redis://" + redis_host + ":" + redis_port + "/0"
+#REDIS_URL = "redis://redis:6379/0"
 import sys
 print("PYTHONPATH:", sys.path, flush=True)
 import pkgutil
