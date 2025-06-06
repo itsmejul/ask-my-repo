@@ -11,9 +11,10 @@ def create_app(config_class="app.config.Config"):
     print("setting embed model")
     from llama_index.embeddings.huggingface import HuggingFaceEmbedding
     from llama_index.core import Settings
-    #TODO move this outside
+
+    embed_model_name = app.config["EMBED_MODEL_NAME"]
     Settings.embed_model = HuggingFaceEmbedding(
-        model_name="BAAI/bge-small-en-v1.5"
+        model_name=embed_model_name
     )
 
     return app

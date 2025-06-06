@@ -11,3 +11,5 @@ gateway/.env
 
 # Qdrant volume where vector collections are stored
 qdrant_data
+
+common.env

@@ -32,6 +32,9 @@ services:
     build: ./retrieve
     # no ports, since it is only accessed by the gateway microservice which is in the same network
     container_name: retrieve
+    env_file:
+      - common.env
+      - retrieve/.env
     networks:
       - ask-my-repo-net
   index:

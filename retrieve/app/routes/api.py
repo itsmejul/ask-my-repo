@@ -13,8 +13,6 @@ from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from datetime import datetime
 
-#qdrant_host = current_app.config["QDRANT_HOST"] # TODO do it like this
-QDRANT_URL = "http://qdrant:6333" #TODO make it like this using network in compose "http://qdrant:6333"
 
 api_bp = Blueprint("api", __name__)
 
@@ -31,8 +29,11 @@ def retrieve_repo():
 
     # Set the embedding model, we do this only once when we start the backend
     print("creating index")
+
+    qdrant_host = current_app.config["QDRANT_HOST"]
+    qdrant_port = current_app.config["QDRANT_PORT"]
     # Create index
-    client = QdrantClient(host="qdrant", port=6333)  # qdrant is the name of the qdrant service
+    client = QdrantClient(host=qdrant_host, port=qdrant_port)
     print("t")
     vector_store = QdrantVectorStore(collection_name=url_id, client=client)
     print("tt")
@@ -42,7 +43,9 @@ def retrieve_repo():
 
     print("retrieving")
     # Retrieve
-    retriever_engine = index.as_retriever(similarity_top_k=5) #TODO we can just choose 3 here
+
+    n_retrieval_results = current_app.config["N_RETRIEVAL_RESULTS"]
+    retriever_engine = index.as_retriever(similarity_top_k=n_retrieval_results) #TODO we can just choose 3 here
     print("tttt")
     retrieval_results = retriever_engine.retrieve(query)
     print("ttttt")
@@ -56,9 +59,10 @@ def retrieve_repo():
         context += result
     from groq import Groq
 
-    client = Groq() # TODO this loads api key from env variable so we have to set it
+    llm_model_name = current_app.config["LLM_MODEL_NAME"] # TODO explain this config 
+    client = Groq()
     completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=llm_model_name,
         messages=[
             {
                 "role": "user",
