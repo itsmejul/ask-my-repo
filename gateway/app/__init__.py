@@ -9,7 +9,7 @@ def create_app(config_class="app.config.Config"):
     frontend_host = app.config["FRONTEND_HOST"]
     frontend_port = app.config["FRONTEND_PORT"]
     frontend_url = "http://" + frontend_host + ":" + str(frontend_port)
-    CORS(app, origins=[frontend_url])
+    CORS(app, origins=[frontend_url, "http://jmosig.com", "http://www.jmosig.com", "http://ask-my-repo.jmosig.com"])  # TODO generate these from env
 
     from app.routes import api
     app.register_blueprint(api.api_bp)

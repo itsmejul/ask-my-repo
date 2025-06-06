@@ -1,8 +1,5 @@
-FROM python:3.11-slim
+FROM nginx:alpine
 
-WORKDIR /app
+COPY index.html /usr/share/nginx/html/index.html
 
-COPY index.html .
-EXPOSE 8010
-CMD ["python", "-m", "http.server", "8010"]  
-# 8010 ist der port im container
+EXPOSE 80

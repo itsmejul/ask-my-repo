@@ -11,3 +11,8 @@ Indexing: Responsible for starting celery jobs that index repos
 
 TODO: periodically check (from FE) whether the indexing is complete so we can start querying
 - method that checks whether a repo is already indexed
+
+- Clone the repo
+- Add your hf and groq keys in common-example.env und retrieve/example.env
+```mv common-example.env common.env```
+```mv retrieve/example.env retrieve/.env```
