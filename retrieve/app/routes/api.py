@@ -2,6 +2,7 @@
 from flask import Blueprint, request, jsonify, current_app
 import requests
 
+from app.utils import within_budget
 
 
 from llama_index.core.schema import TextNode
@@ -34,11 +35,8 @@ def retrieve_repo():
     qdrant_port = current_app.config["QDRANT_PORT"]
     # Create index
     client = QdrantClient(host=qdrant_host, port=qdrant_port)
-    print("t")
     vector_store = QdrantVectorStore(collection_name=url_id, client=client)
-    print("tt")
     storage_context = StorageContext.from_defaults(vector_store= vector_store)
-    print("ttt")
     index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
 
     print("retrieving")
@@ -46,9 +44,7 @@ def retrieve_repo():
 
     n_retrieval_results = current_app.config["N_RETRIEVAL_RESULTS"]
     retriever_engine = index.as_retriever(similarity_top_k=n_retrieval_results) #TODO we can just choose 3 here
-    print("tttt")
     retrieval_results = retriever_engine.retrieve(query)
-    print("ttttt")
     #retrieved_drawing_ids = [n.node.metadata["file_path"] for n in retrieval_results]
     results = [n.node.text for n in retrieval_results]
 
@@ -59,19 +55,22 @@ def retrieve_repo():
         context += result
     from groq import Groq
 
-    llm_model_name = current_app.config["LLM_MODEL_NAME"] # TODO explain this config
-    print(llm_model_name) 
-    client = Groq()
-    print("eeeee")
-    completion = client.chat.completions.create(
-        model=llm_model_name,
-        messages=[
-            {
-                "role": "user",
-                "content": f"{context}\n {query}"
-            }
-        ]
-    )
-    print(completion.choices[0].message.content)
-    print("returning")
-    return {"response": completion.choices[0].message.content}, 200
+    is_within_budget = within_budget()
+
+    if is_within_budget:
+        llm_model_name = current_app.config["LLM_MODEL_NAME"] # TODO explain this config
+        print(llm_model_name) 
+        client = Groq()
+        completion = client.chat.completions.create(
+            model=llm_model_name,
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"{context}\n {query}"
+                }
+            ]
+        )
+        print(completion.choices[0].message.content)
+        return {"response": completion.choices[0].message.content}, 200
+    else:
+        return {"response" : "Max number of Requests reached. Try again later."}, 200

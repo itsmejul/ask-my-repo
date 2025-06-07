@@ -6,3 +6,4 @@ llama-index-vector-stores-qdrant>=0.6.0
 qdrant-client>=1.14.2
 llama-index-embeddings-huggingface>=0.5.4
 groq>=0.25.0
+redis>=6.2.0
