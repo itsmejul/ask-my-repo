@@ -7,7 +7,7 @@ You can try it here: https://ask-my-repo.jmosig.com .
 
 Note that this project is still very much in development, and the current version should be considered a proof-of-concept.
 
-<Insert Demo Screenshot of question with answer>
+![Screenshot of the website](images/demo.jpg)
 
 ## Features
 AskMyRepo works with any public Github repository. Note that the initial indexing (when a repository is queried for the first time) might take some time, but subsequent queries to the same repositories should be very fast (Thanks, Qdrant!).
