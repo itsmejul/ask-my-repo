@@ -9,3 +9,4 @@ llama-index-llms-ollama>=0.5.6
 llama-index-vector-stores-qdrant>=0.6.0
 qdrant-client>=1.14.2
 llama-index-embeddings-huggingface>=0.5.4
+nbconvert
