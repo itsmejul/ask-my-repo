@@ -1,0 +1,91 @@
+body {
+  background-color: #eaeaea;
+  font-family: monospace;
+}
+.wrapper {
+    margin: auto;
+    display: flex;
+    align-items: stretch; /* ensures same height */
+    gap: 1em;
+    justify-content: center;
+}
+canvas {
+  display: block;
+  width: 600px;
+  height: 600px;
+}
+.canvas-div {
+  display: inline-block;
+  width: 600px;
+  margin: 2em auto;
+  padding: 1.5em;
+  background-color: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #000;
+  color: #111;
+}
+
+.panel {
+  display: inline-block;
+  width: 600px;
+  margin: 2em 0;
+  padding: 1.5em;
+  background-color: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #000;
+  color: #111;
+}
+
+.subpanel {
+  margin-top: 1.2em;
+  padding: 1em;
+  border: 2px dashed #444;
+  background-color: #fdfdfd;
+}
+
+.subpanel-title {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  border-bottom: 1px solid #444;
+  padding-bottom: 0.2em;
+}
+
+p {
+  margin: 0.5em 0;
+}
+
+label {
+  display: block;
+  margin: 0.4em 0;
+}
+
+select {
+  display: block;
+  width: 100%;
+  margin-top: 0.2em;
+  margin-bottom: 1em;
+  padding: 0.3em;
+  border: 1px solid #000;
+  background-color: #fefefe;
+  font-family: monospace;
+}
+
+input[type="checkbox"] {
+  margin-right: 0.5em;
+}
+
+button {
+  font-family: monospace;
+  background-color: #ccc;
+  border: 2px solid #000;
+  padding: 0.4em 1em;
+  margin-top: 1em;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 #000;
+}
+
+button:hover {
+  background-color: #bbb;
+}
