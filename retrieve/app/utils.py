@@ -1,6 +1,6 @@
 import redis
 from datetime import datetime
-
+from flask import current_app
 
 def within_budget():
     '''
