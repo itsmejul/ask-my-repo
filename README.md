@@ -14,7 +14,7 @@ AskMyRepo works with any public Github repository. Note that the initial indexin
 
 ## Architecture
 
-<Insert Diagram of architecture>
+![Project Architecture](images/architecture.jpg)  
 
 We use a microservice architecture consisting of three Flask services ```gateway```, ```index```, and ```retrieve```. The main reason for this was that the indexing can take a long time depending on the repository size, so it should be it's own service that can be scaled independently. Also, this way the ```gateway``` acts as just an interface between ```frontend``` and the other services, which provides a clean separation of responsibility.
 
