@@ -3,12 +3,15 @@ body {
   font-family: monospace;
 }
 .wrapper {
-    margin: auto;
+    margin: auto; 
     display: flex;
-    align-items: stretch; /* ensures same height */
-    gap: 1em;
+    align-items: flex-start; /* ensures same height */
+    gap: 1em; 
     justify-content: center;
+    padding: 1em;
 }
+
+
 canvas {
   display: block;
   width: 600px;
@@ -29,13 +32,14 @@ canvas {
 .panel {
   display: inline-block;
   width: 600px;
-  margin: 2em 0;
+  margin: 0 0;
   padding: 1.5em;
   background-color: #fff;
   border: 2px solid #000;
   border-radius: 0;
   box-shadow: 4px 4px 0 #000;
   color: #111;
+  
 }
 
 .subpanel {
@@ -84,8 +88,19 @@ button {
   margin-top: 1em;
   cursor: pointer;
   box-shadow: 2px 2px 0 #000;
+  width: 100%;
+
 }
 
 button:hover {
   background-color: #bbb;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.ascii-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 3.5rem;
+  text-align: center;
+  color: #000;
 }

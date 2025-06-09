@@ -100,8 +100,8 @@ services:
     container_name: nginx_proxy
     volumes:
     # This is where we change our nginx setup depending on dev or prod
-      - ./nginx/dev.conf:/etc/nginx/conf.d/default.conf:ro
-      #- ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      #- ./nginx/dev.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro # mounts https certs
     ports:
       - "80:80"
